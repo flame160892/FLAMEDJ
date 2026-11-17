@@ -173,7 +173,10 @@ code,#midiMon{font-family:ui-monospace,Menlo,monospace;color:var(--tx)}
 .libov{position:fixed;inset:0;z-index:25;background:#141416;display:none;grid-template-columns:minmax(150px,18vw) minmax(0,1fr)}
 .libov.open{display:grid}
 .lside{background:#1d1d20;border-right:4px solid #0b0b0c;display:flex;flex-direction:column;min-height:0}
-.lstop{display:flex;align-items:center;gap:8px;padding:10px;border-bottom:1px solid #000}
+.lstop{display:flex;align-items:center;gap:8px;padding:10px;border-bottom:1px solid #000;flex-wrap:wrap}
+.lscan{flex:1 1 60%;height:46px;white-space:nowrap;border:0;border-radius:8px;background:var(--fire);color:#160800;font-weight:800;font-size:1.05em;cursor:pointer}
+.lstop .ladd{flex:1 1 40%}
+.rescan{background:#2a2a2f;border:1px solid #3c3c42;color:#eee;border-radius:7px;height:30px;min-width:34px;cursor:pointer}
 .lx{width:46px;height:46px;flex:none;background:#0b0b0c;border:0;color:#ddd;font-size:30px;line-height:1;cursor:pointer}
 .ladd{flex:1;height:40px;display:grid;place-items:center;border:1.5px solid #3c3c42;border-radius:8px;background:#26262a;font-weight:700;font-size:.9em;cursor:pointer;white-space:nowrap}
 .srcs{flex:1;overflow:auto}
@@ -292,6 +295,8 @@ code,#midiMon{font-family:ui-monospace,Menlo,monospace;color:var(--tx)}
   <aside class="lside">
     <div class="lstop">
       <button class="lx" id="libClose" title="Tutup">×</button>
+      <button class="lscan" id="scanBtn" title="Pindai semua lagu di folder musik tablet">🔍 Scan</button>
+      <input id="scanDir" type="file" webkitdirectory directory multiple hidden>
       <label class="ladd" title="Tambah flashdisk rekordbox">+ USB<input id="usbDir" type="file" webkitdirectory directory multiple hidden></label>
       <label class="ladd" title="Tambah file lagu">+ File<input id="usbFiles" type="file" multiple accept="audio/*,.mp3,.m4a,.wav,.flac,.ogg,.aac,.aif,.aiff" hidden></label>
     </div>
@@ -978,20 +983,22 @@ function keyCompat(a,b){const p=x=>{const m=/^(\d{1,2})([AB])$/.exec(x||'');retu
 function refKey(){const pl=decks.filter(d=>d.playing&&d.keyName);if(pl.length)return pl[0].keyName;const l=decks.filter(d=>d.buffer&&d.keyName).sort((a,b)=>(b.loadedAt||0)-(a.loadedAt||0));return l.length?l[0].keyName:'';}
 const normPath=p=>(p||'').replace(/\\/g,'/').replace(/^\/+/,'').toLowerCase();
 
-async function openFiles(list,isDir){
-  if(!list||!list.length)return;
+async function openFiles(list,isDir,opt={}){
+  if(!list||!list.length){if(opt.kind==='scan')toast('Tidak ada file di folder itu.');return;}
+  list=list.map(x=>x instanceof File?{f:x,rel:(x.webkitRelativePath||x.name).replace(/\\/g,'/')}:x);
+  const kind=opt.kind||(isDir?'usb':'files');
   let src;
   if(isDir){
-    const root=((list[0].webkitRelativePath||'').split('/')[0])||('USB '+(srcSeq+1));
-    const old=lib.sources.find(x=>x.kind==='usb'&&x.name===root);if(old)ejectSource(old.id,true);
-    src={id:++srcSeq,kind:'usb',name:root,files:new Map(),byName:new Map(),tracks:[],playlists:[],entries:new Map(),tmap:new Map(),urls:[]};
+    const root=(list[0].rel.split('/')[0])||('USB '+(srcSeq+1));
+    const name=kind==='scan'?('Tablet · '+root):root;
+    const old=lib.sources.find(x=>x.kind===kind&&x.name===name);if(old)ejectSource(old.id,true);
+    src={id:++srcSeq,kind,name,files:new Map(),byName:new Map(),tracks:[],playlists:[],entries:new Map(),tmap:new Map(),urls:[]};
   }else{
     src=lib.sources.find(x=>x.kind==='files');
     if(!src){src={id:++srcSeq,kind:'files',name:'File di perangkat',files:new Map(),byName:new Map(),tracks:[],playlists:[],entries:new Map(),tmap:new Map(),urls:[]};}
   }
   let pdb=null;const audio=[];
-  for(const f of list){
-    const rel=(f.webkitRelativePath||f.name).replace(/\\/g,'/');
+  for(const {f,rel} of list){
     const key=isDir&&rel.includes('/')?rel.split('/').slice(1).join('/').toLowerCase():f.name.toLowerCase();
     src.files.set(key,f);const ln=f.name.toLowerCase();if(!src.byName.has(ln))src.byName.set(ln,f);
     if(ln==='export.pdb'&&(!pdb||/pioneer\/rekordbox\//i.test(rel)))pdb=f;
@@ -1007,6 +1014,11 @@ async function openFiles(list,isDir){
     const seen=new Set(src.tracks.map(t=>t.file));
     const add=audio.filter(a=>!seen.has(a.f)).map(a=>({id:'f'+(++trkSeq)+'_'+Math.random().toString(36).slice(2,7),title:a.f.name.replace(/\.[^.]+$/,''),artist:isDir?(a.rel.split('/').slice(-2,-1)[0]||''):'',bpm:0,key:'',duration:0,file:a.f,src}));
     src.tracks=src.tracks.concat(add);add.forEach(t=>src.tmap.set(t.id,t));
+    if(isDir){ // playlist otomatis per folder
+      const byDir=new Map();audio.forEach((a,i)=>{const t=add.find(x=>x.file===a.f);if(!t)return;const parts=a.rel.split('/');const dir=parts.slice(1,-1).join(' / ')||parts[0];
+        if(!byDir.has(dir))byDir.set(dir,[]);byDir.get(dir).push(t);});
+      if(byDir.size>1){let pid=1;[...byDir.keys()].sort((x,y)=>x.localeCompare(y)).forEach(dir=>{const id=pid++;src.playlists.push({id,name:dir});src.entries.set(id,byDir.get(dir).map((t,k)=>[k,t.id]));});}
+    }
     queueMeta(add);
     toast(audio.length?`${src.name}: ${audio.length} file audio`:'Tidak ada lagu di pilihan ini');
     if(!isDir&&add.length===1&&!$('#libOv').classList.contains('open')){loadFromLib(add[0],decks[0].buffer&&!decks[1].buffer?1:0);}
@@ -1029,11 +1041,12 @@ function renderSources(){
   S.innerHTML=lib.sources.map(src=>{
     const navs=[`<button class="nav${lib.cur.src===src.id&&!lib.cur.pl?' sel':''}" data-s="${src.id}" data-pl="">${ICO_ALL}<span>Semua lagu</span><small>${src.tracks.length} lagu</small></button>`]
       .concat(src.playlists.map(p=>`<button class="nav${lib.cur.src===src.id&&String(lib.cur.pl)===String(p.id)?' sel':''}" data-s="${src.id}" data-pl="${p.id}">${ICO_LIST}<span>${esc(p.name)}</span></button>`));
-    return `<div class="srch">${src.kind==='usb'?'💾':'📱'} <span>${esc(src.name)}</span><button class="ejt" data-ej="${src.id}" title="Lepas">⏏</button></div>${navs.join('')}`;
+    return `<div class="srch">${src.kind==='usb'?'💾':src.kind==='scan'?'🔍':'📱'} <span>${esc(src.name)}</span>${src.kind==='scan'?`<button class="rescan" data-rs="1" title="Scan ulang">↻</button>`:''}<button class="ejt" data-ej="${src.id}" title="Lepas">⏏</button></div>${navs.join('')}`;
   }).join('');
 }
 $('#srcs').addEventListener('click',e=>{
   const ej=e.target.closest('[data-ej]');if(ej){ejectSource(+ej.dataset.ej);return;}
+  if(e.target.closest('[data-rs]')){scanMusic(false);return;}
   const n=e.target.closest('.nav');if(!n)return;lib.cur={src:+n.dataset.s,pl:n.dataset.pl};lib.sel=0;
   $$('.nav.sel').forEach(x=>x.classList.remove('sel'));n.classList.add('sel');renderList();
 });
@@ -1059,7 +1072,7 @@ function artFor(t){
 function renderList(){
   const src=curSource(),L=$('#list');
   $('#lTitle').textContent=!src?'Library':lib.cur.pl?((src.playlists.find(p=>String(p.id)===String(lib.cur.pl))||{}).name||'Playlist'):src.name;
-  if(!src){lib.view=[];L.innerHTML='<div class="lempty"><b>Library kosong.</b><br>Tekan <b>+ USB</b> lalu pilih <b>folder utama</b> flashdisk (yang berisi folder <code>PIONEER</code> dan <code>Contents</code>). Setiap flashdisk muncul terpisah di kiri, lengkap dengan playlist rekordbox-nya, dan bisa dilepas dengan tombol ⏏.<br><br>Tekan <b>+ File</b> untuk menambah lagu dari memori HP.</div>';return;}
+  if(!src){lib.view=[];L.innerHTML='<div class="lempty"><b>Library kosong.</b><br>Tekan <b>🔍 Scan</b> untuk memindai semua lagu di folder musik tablet (pilih foldernya sekali, berikutnya cukup tekan Scan). Tekan lama Scan untuk ganti folder.<br><br>Tekan <b>+ USB</b> lalu pilih <b>folder utama</b> flashdisk (yang berisi folder <code>PIONEER</code> dan <code>Contents</code>). Setiap flashdisk muncul terpisah di kiri, lengkap dengan playlist rekordbox-nya, dan bisa dilepas dengan tombol ⏏.<br><br>Tekan <b>+ File</b> untuk menambah lagu dari memori HP.</div>';return;}
   const arr=computeView();lib.view=arr;lib.sel=clamp(lib.sel,0,Math.max(0,arr.length-1));
   if(!arr.length){L.innerHTML='<div class="lempty">Tidak ada lagu di sini.</div>';return;}
   const rk=refKey(),max=600;
@@ -1088,10 +1101,47 @@ document.addEventListener('pointerdown',e=>{const M=$('#rMenu');if(M.classList.c
 $('#q').addEventListener('input',()=>{lib.sel=0;renderList();});
 $('#lSort').addEventListener('change',()=>{lib.sel=0;renderList();});
 $('#usbDir').addEventListener('change',e=>{openFiles([...e.target.files],true);e.target.value='';});
+$('#scanDir').addEventListener('change',e=>{const fs=[...e.target.files];e.target.value='';if(fs.length)openFiles(fs,true,{kind:'scan'});});
+$('#scanBtn').addEventListener('click',()=>scanMusic(false));
 $('#usbFiles').addEventListener('change',e=>{openFiles([...e.target.files],false);e.target.value='';});
 $('#libClose').addEventListener('click',()=>closeLib());
 function openLib(i){lib.target=i||0;$('#lTarget').textContent=`Ketuk lagu → Deck ${lib.target+1}`;$('#lTarget').style.color=COL[lib.target];$('#libOv').classList.add('open');renderSources();renderList();}
 function closeLib(){$('#libOv').classList.remove('open');$('#rMenu').classList.remove('open');}
+
+
+/* ---------- Scan folder musik tablet ---------- */
+const idb={open(){return new Promise((res,rej)=>{const r=indexedDB.open('flamedj',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});},
+  async get(k){try{const db=await this.open();return await new Promise(res=>{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null);});}catch(e){return null;}},
+  async set(k,v){try{const db=await this.open();await new Promise(res=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=res;t.onerror=res;});}catch(e){}}};
+let scanning=false;
+async function scanMusic(change){
+  if(scanning)return;
+  if(!window.showDirectoryPicker){$('#scanDir').click();return;}
+  let dir=change?null:await idb.get('scanDir');
+  try{
+    if(dir){let p=await dir.queryPermission({mode:'read'});if(p!=='granted')p=await dir.requestPermission({mode:'read'});if(p!=='granted')dir=null;}
+    if(!dir){dir=await window.showDirectoryPicker({id:'flamedj-music',mode:'read',startIn:'music'});await idb.set('scanDir',dir);}
+  }catch(e){if(e&&e.name==='AbortError')return;console.warn(e);$('#scanDir').click();return;}
+  scanning=true;$('#scanBtn').textContent='⏳ Memindai…';
+  const out=[];let n=0;
+  const SKIP=/^(\.|android$|data$|obb$)/i;
+  async function walk(h,path,depth){
+    if(depth>8)return;
+    for await(const [name,ch] of h.entries()){
+      if(SKIP.test(name))continue;
+      const rel=path+'/'+name;
+      if(ch.kind==='directory'){await walk(ch,rel,depth+1);}
+      else if(AUDIO_RE.test(name)||/\/pioneer\//i.test(rel)){try{out.push({f:await ch.getFile(),rel});if(AUDIO_RE.test(name)&&++n%50===0)$('#scanBtn').textContent=`⏳ ${n} lagu…`;}catch(e){}}
+    }
+  }
+  try{await walk(dir,dir.name,0);}catch(e){console.warn(e);toast('Sebagian folder tidak bisa dibaca.');}
+  scanning=false;$('#scanBtn').textContent='🔍 Scan';
+  if(!out.length){toast(`Tidak ada lagu di folder "${dir.name}". Tekan lama tombol Scan untuk memilih folder lain.`,5000);return;}
+  await openFiles(out,true,{kind:'scan'});
+}
+(function(){const b=$('#scanBtn');let t;b.addEventListener('pointerdown',()=>{t=setTimeout(()=>{t=null;b._lp=true;scanMusic(true);},700);});
+  b.addEventListener('pointerup',()=>{if(t)clearTimeout(t);});b.addEventListener('pointerleave',()=>{if(t)clearTimeout(t);});
+  b.addEventListener('click',e=>{if(b._lp){b._lp=false;e.stopImmediatePropagation();}},true);})();
 
 /* preview (dengar dulu sebelum dimuat) */
 const preview={a:new Audio(),t:null,url:null};
