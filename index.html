@@ -169,6 +169,62 @@ code,#midiMon{font-family:ui-monospace,Menlo,monospace;color:var(--tx)}
 #toast{position:fixed;left:50%;top:14px;transform:translateX(-50%) translateY(-20px);background:#2a2a30;color:var(--tx);border:1px solid var(--ln);padding:10px 14px;border-radius:12px;opacity:0;transition:.25s;pointer-events:none;max-width:92vw;z-index:30}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #recLink{display:none;color:var(--ok);font-size:.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* library overlay */
+.libov{position:fixed;inset:0;z-index:25;background:#141416;display:none;grid-template-columns:minmax(150px,18vw) minmax(0,1fr)}
+.libov.open{display:grid}
+.lside{background:#1d1d20;border-right:4px solid #0b0b0c;display:flex;flex-direction:column;min-height:0}
+.lstop{display:flex;align-items:center;gap:8px;padding:10px;border-bottom:1px solid #000}
+.lx{width:46px;height:46px;flex:none;background:#0b0b0c;border:0;color:#ddd;font-size:30px;line-height:1;cursor:pointer}
+.ladd{flex:1;height:40px;display:grid;place-items:center;border:1.5px solid #3c3c42;border-radius:8px;background:#26262a;font-weight:700;font-size:.9em;cursor:pointer;white-space:nowrap}
+.srcs{flex:1;overflow:auto}
+.srch{display:flex;align-items:center;gap:8px;padding:10px 10px 8px;background:#121214;border-top:1px solid #000;border-bottom:1px solid #000;color:var(--fire);font-weight:800;font-size:.85em;letter-spacing:.05em;text-transform:uppercase}
+.srch span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srch small{color:var(--dim);font-weight:600;text-transform:none;letter-spacing:0}
+.ejt{background:#2a2a2f;border:1px solid #3c3c42;color:#eee;border-radius:7px;height:30px;min-width:34px;cursor:pointer;font-size:1em}
+.nav{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;min-height:clamp(70px,13vh,130px);padding:10px 8px;background:transparent;border:0;border-bottom:2px solid #0f0f11;color:#9a9aa3;font-size:1.15em;cursor:pointer;text-align:center}
+.nav svg{width:1.6em;height:1.6em}
+.nav.sel{background:#3a3a40;color:#fff}
+.nav small{font-size:.7em;color:var(--dim)}
+.lmain{display:flex;flex-direction:column;min-width:0;min-height:0}
+.lhead{display:flex;align-items:center;gap:10px;padding:12px 16px;background:#1d1d20;border-bottom:1px solid #000;flex-wrap:wrap}
+.lhead h2{margin:0 auto 0 0;font-size:1.6em;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
+.lhead input,.lhead select{height:38px}
+.lhead input{width:min(260px,30vw)}
+.ltarget{color:var(--fire);font-weight:700;font-size:.9em;white-space:nowrap}
+.ltracks{flex:1;overflow:auto;background:#000}
+.lrow{display:flex;align-items:center;gap:14px;min-height:clamp(60px,7.8vh,82px);border-bottom:1px solid #1b1b1e;padding-right:12px;cursor:pointer;position:relative}
+.lrow:nth-child(even){background:#151517}
+.lrow.sel{background:#262b3a!important}
+.lrow .art{width:clamp(60px,7.8vh,82px);aspect-ratio:1;flex:none;background:#26262a center/cover no-repeat;display:grid;place-items:center;color:#55555c;align-self:stretch}
+.lrow .art svg{width:40%;height:40%}
+.lrow .tt{flex:1;min-width:0}
+.lrow .tt b{display:block;font-size:1.35em;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow .tt small{display:block;color:#9a9aa3;font-size:1.1em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.lrow .bpm{width:4.2em;text-align:right;color:#b8b8c0;font-size:1.35em;font-variant-numeric:tabular-nums;flex:none}
+.lrow .ky{width:3.2em;height:2.6em;display:grid;place-items:center;color:#b8b8c0;font-size:1.25em;flex:none}
+.lrow .ky.ok{background:#6cff3c;color:#0a2400}
+.lrow .pv,.lrow .more{background:transparent;border:0;color:#fff;cursor:pointer;flex:none;height:48px;width:48px;display:grid;place-items:center;font-size:1.5em}
+.lrow .pv svg{width:1.3em;height:1.3em}
+.lrow .pv.on{color:var(--fire)}
+.lrow .more{letter-spacing:2px;font-weight:900}
+.lrow .ld{position:absolute;left:0;top:0;bottom:0;width:5px}
+.lrow .ld.d0{background:var(--c1)}.lrow .ld.d1{background:var(--c2)}
+.lempty{color:var(--dim);padding:30px;font-size:1.1em;line-height:1.6;max-width:640px}
+.lempty b{color:var(--tx)}
+.rmenu{position:fixed;display:none;flex-direction:column;background:#2a2a30;border:1px solid #444;border-radius:10px;overflow:hidden;z-index:30;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+.rmenu.open{display:flex}
+.rmenu button{background:transparent;border:0;color:#fff;padding:14px 20px;text-align:left;font-size:1em;cursor:pointer}
+.rmenu button+button{border-top:1px solid #3a3a40}
+.rmenu button:active{background:#3a3a40}
+.loadbtn.has{background-size:cover;background-position:center;border-style:solid}
+.loadbtn.has svg{display:none}
+@media (orientation:portrait) and (max-width:900px){
+  .libov{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
+  .lside{border-right:0;border-bottom:4px solid #0b0b0c;max-height:38vh}
+  .nav{min-height:52px;flex-direction:row;font-size:1em}
+  .lhead h2{max-width:100%}
+  .lrow .bpm{font-size:1.1em}.lrow .tt b{font-size:1.1em}.lrow .tt small{font-size:.95em}
+}
 #rot{display:none}
 /* portrait phones: stacked */
 @media (orientation:portrait) and (max-width:900px){
@@ -232,15 +288,26 @@ code,#midiMon{font-family:ui-monospace,Menlo,monospace;color:var(--tx)}
   </div>
 </div>
 
-<div class="sheet" id="libSheet"><div class="card">
-  <div class="chead"><h2>Library</h2>
-    <label class="btn">📁 Buka USB rekordbox<input id="usbDir" type="file" webkitdirectory directory multiple hidden></label>
-    <label class="btn">Pilih file<input id="usbFiles" type="file" multiple hidden></label>
-    <button class="btn" data-close>Tutup</button>
-  </div>
-  <div class="libbar"><select id="plSel"><option value="">Semua lagu</option></select><input id="q" type="search" placeholder="Cari judul / artis"></div>
-  <div class="list" id="list"><div class="empty">Pilih <b>folder utama</b> flashdisk (yang berisi folder <code>PIONEER</code> dan <code>Contents</code>). Playlist, BPM, kunci nada, beatgrid, dan hot cue dari rekordbox ikut terbaca.<br>Atau tekan <b>Pilih file</b> untuk memilih lagu langsung.</div></div>
-</div></div>
+<div class="libov" id="libOv">
+  <aside class="lside">
+    <div class="lstop">
+      <button class="lx" id="libClose" title="Tutup">×</button>
+      <label class="ladd" title="Tambah flashdisk rekordbox">+ USB<input id="usbDir" type="file" webkitdirectory directory multiple hidden></label>
+      <label class="ladd" title="Tambah file lagu">+ File<input id="usbFiles" type="file" multiple accept="audio/*,.mp3,.m4a,.wav,.flac,.ogg,.aac,.aif,.aiff" hidden></label>
+    </div>
+    <div class="srcs" id="srcs"></div>
+  </aside>
+  <section class="lmain">
+    <div class="lhead">
+      <h2 id="lTitle">Library</h2>
+      <input id="q" type="search" placeholder="Cari judul / artis">
+      <select id="lSort"><option value="">Urutan asli</option><option value="title">Judul</option><option value="artist">Artis</option><option value="bpm">BPM</option><option value="key">Key</option></select>
+      <span class="ltarget" id="lTarget">Ketuk lagu → Deck 1</span>
+    </div>
+    <div class="ltracks" id="list"></div>
+  </section>
+  <div class="rmenu" id="rMenu"><button data-d="0">Muat ke Deck 1</button><button data-d="1">Muat ke Deck 2</button></div>
+</div>
 
 <div class="sheet" id="setSheet"><div class="card">
   <div class="chead"><h2>Pengaturan</h2>
@@ -406,7 +473,7 @@ class Deck{
       toast(`Gagal membuka ${file.name} (${ext}, ${(file.size/1048576).toFixed(1)} MB). File mungkin rusak, formatnya tidak didukung, atau HP kehabisan memori. Format yang didukung: MP3, WAV, AIFF, FLAC, M4A/AAC, OGG.`+(ext==='M4A'?' M4A lossless (ALAC) tidak didukung.':''),7000);return;}
     this.stopSrc();this.playing=false;this.previewing=false;
     Object.assign(this,{buffer:buf,offset:0,loop:null,lastLoop:null,loopInPt:null,hot:new Array(8).fill(null),synced:false});
-    this.title=meta.title||file.name.replace(/\.[^.]+$/,'');this.artist=meta.artist||'';this.keyName=meta.key||'';
+    this.title=meta.title||file.name.replace(/\.[^.]+$/,'');this.artist=meta.artist||'';this.keyName=toCamelot(meta.key||'');this.artUrl=meta.artUrl||null;this.trackRef=meta.ref||null;this.loadedAt=Date.now();
     this.computePeaks();
     let det=null;if(!(meta.bpm>0)||meta.grid0==null)det=detectBeat(buf,meta.bpm>0?meta.bpm:0);
     this.bpm=meta.bpm>0?meta.bpm:(det?det.bpm:0);
@@ -415,7 +482,7 @@ class Deck{
     this.cue=(meta.mem!=null&&meta.mem<buf.duration)?meta.mem:0;this.offset=this.cue;
     this.setEchoTime();this.render();wake();
   }
-  eject(){this.stopSrc();Object.assign(this,{buffer:null,playing:false,offset:0,loop:null,lastLoop:null,hot:new Array(8).fill(null),title:'',artist:'',keyName:'',bpm:0,synced:false,fine:null,ov:null});this.render();wake();}
+  eject(){this.stopSrc();Object.assign(this,{buffer:null,playing:false,offset:0,loop:null,lastLoop:null,hot:new Array(8).fill(null),title:'',artist:'',keyName:'',bpm:0,synced:false,fine:null,ov:null,artUrl:null,trackRef:null});this.render();wake();renderListSoon();}
   computePeaks(){
     const b=this.buffer,A=b.getChannelData(0),B=b.numberOfChannels>1?b.getChannelData(1):A;
     const fr=this.fineRate,n=Math.ceil(b.duration*fr),per=b.sampleRate/fr,fine=new Float32Array(n);let mx=1e-6;
@@ -433,7 +500,7 @@ class Deck{
     if(this.loop){s.loop=true;s.loopStart=this.loop.s;s.loopEnd=this.loop.e;}
     s.connect(this.trimG);
     s.onended=()=>{if(this.src!==s)return;this.src=null;this.playing=false;this.offset=this.dur;this.render();wake();};
-    this.src=s;this.startTime=ctx.currentTime;s.start(0,this.offset);this.playing=true;this.render();wake();
+    this.src=s;this.startTime=ctx.currentTime;s.start(0,this.offset);this.playing=true;this.render();wake();renderListSoon();
   }
   pause(){if(!this.playing)return;this.offset=this.pos;this.stopSrc();this.playing=false;this.render();wake();}
   togglePlay(){if(this.previewing){this.previewing=false;this.render();return;}this.playing?this.pause():this.play();}
@@ -658,7 +725,7 @@ function buildDeckUI(d){
   slot.innerHTML=slotHTML();side.innerHTML=sideHTML(i);
   bg.innerHTML=`<button class="play">${ICON.play}</button><div class="cs"><button class="cue">CUE</button><button class="set">SET</button></div>`;
   const q=s=>$(s,side);
-  const u=d.ui={ttl:$('.ttl',slot),art:$('.art',slot),key:$('.key',slot),tm:$('.tm',slot),ov:$('.ov',slot),
+  const u=d.ui={lb:$('.loadbtn',slot),ttl:$('.ttl',slot),art:$('.art',slot),key:$('.key',slot),tm:$('.tm',slot),ov:$('.ov',slot),
     bpm:q('.bpmv'),pct:q('.pct'),sync:q('.sync'),ltog:q('.ltog'),ln:q('.ln'),pm:q('.pm'),
     play:$('.play',bg),cue:$('.cue',bg),hots:$$('.hc',side),lps:$$('.lp',side),kills:$$('.kill',side),ebs:$$('.eb',side),side,mm:$('#mm'+i),vw:$('#vw'+i)};
   $('.loadbtn',slot).addEventListener('click',()=>openLib(i));
@@ -705,7 +772,8 @@ function showPanel(d){
 }
 function renderDeck(d){
   const u=d.ui;if(!u)return;
-  u.ttl.textContent=d.buffer?d.title:'Ketuk untuk memuat lagu';u.ttl.classList.toggle('empty',!d.buffer);
+  u.ttl.textContent=d.buffer?d.title:'Ketuk untuk memuat lagu';
+  if(u.lb){u.lb.classList.toggle('has',!!(d.buffer&&d.artUrl));u.lb.style.backgroundImage=d.buffer&&d.artUrl?`url('${d.artUrl}')`:'';}u.ttl.classList.toggle('empty',!d.buffer);
   u.art.textContent=d.buffer?(d.artist||''):'';u.key.textContent=d.buffer?d.keyName:'';
   u.bpm.textContent=d.bpm?(d.bpm*d.rate).toFixed(1):'--';
   const pct=(d.baseRate-1)*100;u.pct.textContent=(pct>=0?'+':'')+pct.toFixed(1)+'%';
@@ -829,7 +897,7 @@ async function wake(){const any=decks.some(d=>d.playing);try{if(any&&!wl&&naviga
 /* ---------- Sheets ---------- */
 function openSheet(id){$('#'+id).classList.add('open');}
 $$('.sheet').forEach(s=>{s.addEventListener('click',e=>{if(e.target===s||e.target.closest('[data-close]'))s.classList.remove('open');});});
-function openLib(){openSheet('libSheet');}
+
 $('#logo').addEventListener('click',()=>openSheet('setSheet'));
 $('#fsBtn').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch(e){toast('Layar penuh tidak tersedia di sini');}});
 
@@ -858,8 +926,10 @@ function parsePDB(ab){
   const tmap=new Map();
   for(const r of rows(0)){try{const S=i=>str(r+dv.getUint16(r+0x5e+2*i,true));
     const t={id:dv.getUint32(r+0x48,true),bpm:dv.getUint32(r+0x38,true)/100,duration:dv.getUint16(r+0x54,true),
-      artist:artists.get(dv.getUint32(r+0x44,true))||'',key:keys.get(dv.getUint32(r+0x20,true))||'',title:S(17),anlz:S(14),filename:S(19),path:S(20)};
+      artist:artists.get(dv.getUint32(r+0x44,true))||'',key:keys.get(dv.getUint32(r+0x20,true))||'',title:S(17),anlz:S(14),filename:S(19),path:S(20),artId:dv.getUint32(r+0x1c,true)};
     if(!t.title)t.title=t.filename||('Track '+t.id);tmap.set(t.id,t);}catch(e){}}
+  const arts=new Map();for(const r of rows(13)){try{arts.set(dv.getUint32(r,true),str(r+4));}catch(e){}}
+  for(const t of tmap.values())if(t.artId&&arts.has(t.artId))t.artPath=arts.get(t.artId);
   const pmap=new Map();
   for(const r of rows(7)){try{const p={parent:dv.getUint32(r,true),id:dv.getUint32(r+12,true),folder:dv.getUint32(r+16,true)!==0,name:str(r+20)};pmap.set(p.id,p);}catch(e){}}
   const playlists=[];
@@ -890,57 +960,197 @@ function parseANLZ(ab){
   }
   return out;
 }
-const lib={files:new Map(),byName:new Map(),tracks:[],playlists:[],entries:new Map(),tmap:new Map(),view:[],sel:0};
+/* ---------- Library (multi-source: tiap USB terpisah) ---------- */
 const AUDIO_RE=/\.(mp3|m4a|aac|wav|flac|ogg|opus|mp4|aif|aiff)$/i;
+const lib={sources:[],cur:{src:null,pl:''},view:[],sel:0,target:0};let srcSeq=0,trkSeq=0;
+const ICO_LIST=SV('<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h8"/>');
+const ICO_ALL=SV('<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>');
+const CAM={'G#m':'1A','Abm':'1A','D#m':'2A','Ebm':'2A','A#m':'3A','Bbm':'3A','Fm':'4A','Cm':'5A','Gm':'6A','Dm':'7A','Am':'8A','Em':'9A','Bm':'10A','F#m':'11A','Gbm':'11A','C#m':'12A','Dbm':'12A',
+  'B':'1B','Cb':'1B','F#':'2B','Gb':'2B','Db':'3B','C#':'3B','Ab':'4B','G#':'4B','Eb':'5B','D#':'5B','Bb':'6B','A#':'6B','F':'7B','C':'8B','G':'9B','D':'10B','A':'11B','E':'12B'};
+function toCamelot(k){
+  if(!k)return'';k=String(k).trim();let m=k.match(/^0?(\d{1,2})\s*([ABab])$/);if(m)return(+m[1])+m[2].toUpperCase();
+  m=k.match(/^(\d{1,2})\s*([mdMD])$/);if(m){const n=+m[1];return m[2].toLowerCase()==='m'?(((n+6)%12)||12)+'A':(((n+6)%12)||12)+'B';}
+  k=k.replace(/♯/g,'#').replace(/♭/g,'b').replace(/\s*(minor|min)$/i,'m').replace(/\s*(major|maj)$/i,'').replace(/\s+/g,'');
+  if(!k)return'';k=k[0].toUpperCase()+k.slice(1);return CAM[k]||k;
+}
+function keyCompat(a,b){const p=x=>{const m=/^(\d{1,2})([AB])$/.exec(x||'');return m?[+m[1],m[2]]:null;};const x=p(a),y=p(b);if(!x||!y)return false;
+  if(x[0]===y[0])return true;if(x[1]!==y[1])return false;const d=Math.abs(x[0]-y[0]);return d===1||d===11;}
+function refKey(){const pl=decks.filter(d=>d.playing&&d.keyName);if(pl.length)return pl[0].keyName;const l=decks.filter(d=>d.buffer&&d.keyName).sort((a,b)=>(b.loadedAt||0)-(a.loadedAt||0));return l.length?l[0].keyName:'';}
+const normPath=p=>(p||'').replace(/\\/g,'/').replace(/^\/+/,'').toLowerCase();
+
 async function openFiles(list,isDir){
   if(!list||!list.length)return;
-  lib.files.clear();lib.byName.clear();let pdb=null;const audio=[];
+  let src;
+  if(isDir){
+    const root=((list[0].webkitRelativePath||'').split('/')[0])||('USB '+(srcSeq+1));
+    const old=lib.sources.find(x=>x.kind==='usb'&&x.name===root);if(old)ejectSource(old.id,true);
+    src={id:++srcSeq,kind:'usb',name:root,files:new Map(),byName:new Map(),tracks:[],playlists:[],entries:new Map(),tmap:new Map(),urls:[]};
+  }else{
+    src=lib.sources.find(x=>x.kind==='files');
+    if(!src){src={id:++srcSeq,kind:'files',name:'File di perangkat',files:new Map(),byName:new Map(),tracks:[],playlists:[],entries:new Map(),tmap:new Map(),urls:[]};}
+  }
+  let pdb=null;const audio=[];
   for(const f of list){
     const rel=(f.webkitRelativePath||f.name).replace(/\\/g,'/');
     const key=isDir&&rel.includes('/')?rel.split('/').slice(1).join('/').toLowerCase():f.name.toLowerCase();
-    lib.files.set(key,f);const ln=f.name.toLowerCase();if(!lib.byName.has(ln))lib.byName.set(ln,f);
+    src.files.set(key,f);const ln=f.name.toLowerCase();if(!src.byName.has(ln))src.byName.set(ln,f);
     if(ln==='export.pdb'&&(!pdb||/pioneer\/rekordbox\//i.test(rel)))pdb=f;
     if(AUDIO_RE.test(f.name)&&!f.name.startsWith('._'))audio.push({f,rel});
   }
-  lib.tracks=[];lib.playlists=[];lib.entries=new Map();lib.tmap=new Map();
-  if(pdb){try{const d=parsePDB(await pdb.arrayBuffer());Object.assign(lib,d);toast(`rekordbox: ${d.tracks.length} lagu, ${d.playlists.length} playlist`);}
-    catch(e){console.error(e);toast('export.pdb tidak bisa dibaca. Menampilkan file audio saja.');pdb=null;}}
-  if(!pdb){
-    lib.tracks=audio.map((a,i)=>({id:i+1,title:a.f.name.replace(/\.[^.]+$/,''),artist:a.rel.split('/').slice(-2,-1)[0]||'',bpm:0,key:'',duration:0,file:a.f}));
-    if(!isDir&&audio.length===1){loadFromLib(lib.tracks[0],decks[0].buffer&&!decks[1].buffer?1:0);}
-    toast(audio.length?`${audio.length} file audio ditemukan`:'Tidak ada lagu di pilihan ini');
+  if(pdb){
+    try{const d=parsePDB(await pdb.arrayBuffer());src.tracks=d.tracks;src.playlists=d.playlists;src.entries=d.entries;src.tmap=d.tmap;src.rekordbox=true;
+      src.tracks.forEach(t=>{t.src=src;t.key=toCamelot(t.key);});
+      toast(`${src.name}: ${d.tracks.length} lagu, ${d.playlists.length} playlist rekordbox`);}
+    catch(e){console.error(e);toast('export.pdb tidak bisa dibaca. Menampilkan file audio saja.');pdb=null;}
   }
-  $('#plSel').innerHTML='<option value="">Semua lagu</option>'+lib.playlists.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
-  lib.sel=0;renderList();
+  if(!pdb){
+    const seen=new Set(src.tracks.map(t=>t.file));
+    const add=audio.filter(a=>!seen.has(a.f)).map(a=>({id:'f'+(++trkSeq)+'_'+Math.random().toString(36).slice(2,7),title:a.f.name.replace(/\.[^.]+$/,''),artist:isDir?(a.rel.split('/').slice(-2,-1)[0]||''):'',bpm:0,key:'',duration:0,file:a.f,src}));
+    src.tracks=src.tracks.concat(add);add.forEach(t=>src.tmap.set(t.id,t));
+    queueMeta(add);
+    toast(audio.length?`${src.name}: ${audio.length} file audio`:'Tidak ada lagu di pilihan ini');
+    if(!isDir&&add.length===1&&!$('#libOv').classList.contains('open')){loadFromLib(add[0],decks[0].buffer&&!decks[1].buffer?1:0);}
+  }
+  if(!lib.sources.includes(src))lib.sources.push(src);
+  lib.cur={src:src.id,pl:''};lib.sel=0;renderSources();renderList();
+}
+function ejectSource(id,silent){
+  const i=lib.sources.findIndex(x=>x.id===id);if(i<0)return;const src=lib.sources[i];
+  if(preview.t&&preview.t.src===src)stopPreview();
+  src.urls.forEach(u=>{try{URL.revokeObjectURL(u);}catch(e){}});
+  lib.sources.splice(i,1);
+  if(lib.cur.src===id)lib.cur={src:lib.sources.length?lib.sources[0].id:null,pl:''};
+  renderSources();renderList();
+  if(!silent)toast(`${src.name} dilepas dari library. Untuk mencabut flashdisk dengan aman, gunakan "Keluarkan" di notifikasi Android.`,6000);
+}
+function renderSources(){
+  const S=$('#srcs');
+  if(!lib.sources.length){S.innerHTML='<div class="lempty" style="padding:16px;font-size:.95em">Belum ada sumber. Tekan <b>+ USB</b> untuk flashdisk rekordbox atau <b>+ File</b> untuk lagu di HP.</div>';return;}
+  S.innerHTML=lib.sources.map(src=>{
+    const navs=[`<button class="nav${lib.cur.src===src.id&&!lib.cur.pl?' sel':''}" data-s="${src.id}" data-pl="">${ICO_ALL}<span>Semua lagu</span><small>${src.tracks.length} lagu</small></button>`]
+      .concat(src.playlists.map(p=>`<button class="nav${lib.cur.src===src.id&&String(lib.cur.pl)===String(p.id)?' sel':''}" data-s="${src.id}" data-pl="${p.id}">${ICO_LIST}<span>${esc(p.name)}</span></button>`));
+    return `<div class="srch">${src.kind==='usb'?'💾':'📱'} <span>${esc(src.name)}</span><button class="ejt" data-ej="${src.id}" title="Lepas">⏏</button></div>${navs.join('')}`;
+  }).join('');
+}
+$('#srcs').addEventListener('click',e=>{
+  const ej=e.target.closest('[data-ej]');if(ej){ejectSource(+ej.dataset.ej);return;}
+  const n=e.target.closest('.nav');if(!n)return;lib.cur={src:+n.dataset.s,pl:n.dataset.pl};lib.sel=0;
+  $$('.nav.sel').forEach(x=>x.classList.remove('sel'));n.classList.add('sel');renderList();
+});
+function curSource(){return lib.sources.find(x=>x.id===lib.cur.src)||null;}
+function computeView(){
+  const src=curSource();if(!src)return[];
+  let arr;
+  if(lib.cur.pl){const e=src.entries.get(+lib.cur.pl)||[];arr=e.map(([,tid])=>src.tmap.get(tid)).filter(Boolean);}else arr=src.tracks.slice();
+  const q=$('#q').value.trim().toLowerCase();if(q)arr=arr.filter(t=>(t.title+' '+t.artist).toLowerCase().includes(q));
+  const so=$('#lSort').value;
+  if(so==='title')arr.sort((a,b)=>a.title.localeCompare(b.title));
+  else if(so==='artist')arr.sort((a,b)=>(a.artist||'').localeCompare(b.artist||''));
+  else if(so==='bpm')arr.sort((a,b)=>(a.bpm||999)-(b.bpm||999));
+  else if(so==='key')arr.sort((a,b)=>(parseInt(a.key)||99)-(parseInt(b.key)||99)||(a.key||'').localeCompare(b.key||''));
+  return arr;
+}
+function artFor(t){
+  if(t.artUrl!==undefined)return t.artUrl;t.artUrl=null;
+  if(t.artBlob){t.artUrl=URL.createObjectURL(t.artBlob);t.src.urls.push(t.artUrl);}
+  else if(t.artPath){const f=t.src.files.get(normPath(t.artPath));if(f){t.artUrl=URL.createObjectURL(f);t.src.urls.push(t.artUrl);}}
+  return t.artUrl;
 }
 function renderList(){
-  const pid=$('#plSel').value,q=$('#q').value.trim().toLowerCase();let arr=lib.tracks;
-  if(pid){const e=lib.entries.get(+pid)||[];arr=e.map(([,tid])=>lib.tmap.get(tid)).filter(Boolean);}else arr=[...arr].sort((a,b)=>a.title.localeCompare(b.title));
-  if(q)arr=arr.filter(t=>(t.title+' '+t.artist).toLowerCase().includes(q));
-  lib.view=arr;lib.sel=clamp(lib.sel,0,Math.max(0,arr.length-1));
-  const L=$('#list');if(!arr.length){L.innerHTML='<div class="empty">Tidak ada lagu.</div>';return;}
-  const max=500;
-  L.innerHTML=arr.slice(0,max).map((t,i)=>`<div class="item${i===lib.sel?' sel':''}" data-i="${i}"><div class="t"><b>${esc(t.title)}</b><small>${esc(t.artist||'—')}${t.bpm?' · '+t.bpm.toFixed(1)+' BPM':''}${t.key?' · '+esc(t.key):''}${t.duration?' · '+fmt(t.duration):''}</small></div><button class="b1" data-d="0">1</button><button class="b2" data-d="1">2</button></div>`).join('')
-    +(arr.length>max?`<div class="empty">+${arr.length-max} lagu lagi. Gunakan pencarian.</div>`:'');
+  const src=curSource(),L=$('#list');
+  $('#lTitle').textContent=!src?'Library':lib.cur.pl?((src.playlists.find(p=>String(p.id)===String(lib.cur.pl))||{}).name||'Playlist'):src.name;
+  if(!src){lib.view=[];L.innerHTML='<div class="lempty"><b>Library kosong.</b><br>Tekan <b>+ USB</b> lalu pilih <b>folder utama</b> flashdisk (yang berisi folder <code>PIONEER</code> dan <code>Contents</code>). Setiap flashdisk muncul terpisah di kiri, lengkap dengan playlist rekordbox-nya, dan bisa dilepas dengan tombol ⏏.<br><br>Tekan <b>+ File</b> untuk menambah lagu dari memori HP.</div>';return;}
+  const arr=computeView();lib.view=arr;lib.sel=clamp(lib.sel,0,Math.max(0,arr.length-1));
+  if(!arr.length){L.innerHTML='<div class="lempty">Tidak ada lagu di sini.</div>';return;}
+  const rk=refKey(),max=600;
+  L.innerHTML=arr.slice(0,max).map((t,i)=>{
+    const a=artFor(t),ld=decks.findIndex(d=>d.trackRef===t&&d.buffer);
+    return `<div class="lrow${i===lib.sel?' sel':''}" data-i="${i}">${ld>=0?`<i class="ld d${ld}"></i>`:''}<div class="art"${a?` style="background-image:url('${a}')"`:''}>${a?'':ICO_ALL}</div>
+      <div class="tt"><b>${esc(t.title)}</b><small>${esc(t.artist||'—')}</small></div>
+      <span class="bpm">${t.bpm?t.bpm.toFixed(1):'—'}</span><span class="ky${t.key&&rk&&keyCompat(t.key,rk)?' ok':''}">${esc(t.key||'')}</span>
+      <button class="pv${preview.t===t?' on':''}" data-pv="${i}" title="Preview">${preview.t===t?ICON.pause:ICON.play}</button><button class="more" data-m="${i}" title="Muat ke deck">•••</button></div>`;
+  }).join('')+(arr.length>max?`<div class="lempty">+${arr.length-max} lagu lagi. Gunakan pencarian.</div>`:'');
 }
-$('#list').addEventListener('click',e=>{const it=e.target.closest('.item');if(!it)return;const i=+it.dataset.i;lib.sel=i;$$('.item.sel').forEach(x=>x.classList.remove('sel'));it.classList.add('sel');
-  const b=e.target.closest('button');if(b){loadFromLib(lib.view[i],+b.dataset.d);$('#libSheet').classList.remove('open');}});
-$('#plSel').addEventListener('change',()=>{lib.sel=0;renderList();});
+let rTimer=null;function renderListSoon(){if(rTimer)return;rTimer=setTimeout(()=>{rTimer=null;if($('#libOv').classList.contains('open')){const sc=$('#list').scrollTop;renderList();$('#list').scrollTop=sc;}},250);}
+$('#list').addEventListener('click',e=>{
+  const pv=e.target.closest('[data-pv]');if(pv){e.stopPropagation();togglePreview(lib.view[+pv.dataset.pv]);return;}
+  const m=e.target.closest('[data-m]');if(m){e.stopPropagation();openRowMenu(+m.dataset.m,m);return;}
+  const row=e.target.closest('.lrow');if(!row)return;const i=+row.dataset.i;lib.sel=i;
+  loadFromLib(lib.view[i],lib.target);closeLib();
+});
+function openRowMenu(i,el){
+  const M=$('#rMenu'),r=el.getBoundingClientRect();M.dataset.i=i;M.classList.add('open');
+  const mw=M.offsetWidth||200,mh=M.offsetHeight||100;
+  M.style.left=Math.max(8,Math.min(innerWidth-mw-8,r.right-mw))+'px';M.style.top=Math.max(8,Math.min(innerHeight-mh-8,r.bottom))+'px';
+}
+$('#rMenu').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const M=$('#rMenu');M.classList.remove('open');loadFromLib(lib.view[+M.dataset.i],+b.dataset.d);closeLib();});
+document.addEventListener('pointerdown',e=>{const M=$('#rMenu');if(M.classList.contains('open')&&!e.target.closest('#rMenu')&&!e.target.closest('[data-m]'))M.classList.remove('open');});
 $('#q').addEventListener('input',()=>{lib.sel=0;renderList();});
+$('#lSort').addEventListener('change',()=>{lib.sel=0;renderList();});
 $('#usbDir').addEventListener('change',e=>{openFiles([...e.target.files],true);e.target.value='';});
 $('#usbFiles').addEventListener('change',e=>{openFiles([...e.target.files],false);e.target.value='';});
-function fileFor(t){if(t.file)return t.file;const k=(t.path||'').replace(/\\/g,'/').replace(/^\/+/,'').toLowerCase();
-  return lib.files.get(k)||(t.filename&&lib.byName.get(t.filename.toLowerCase()))||lib.byName.get((t.path||'').split('/').pop().toLowerCase());}
-async function loadFromLib(t,di){
-  if(!t)return;const f=fileFor(t);if(!f){toast('File lagu tidak ditemukan. Pilih folder UTAMA flashdisk.');return;}
-  const meta={title:t.title,artist:t.artist,bpm:t.bpm,key:t.key};
-  if(t.anlz){const k=t.anlz.replace(/\\/g,'/').replace(/^\/+/,'').toLowerCase();
-    for(const kk of[k,k.replace(/\.dat$/,'.ext')]){const af=lib.files.get(kk);if(!af)continue;
-      try{const r=parseANLZ(await af.arrayBuffer());if(r){if(meta.grid0==null&&r.grid0!=null)meta.grid0=r.grid0;if(!meta.hot)meta.hot=[];r.hot.forEach((v,i)=>{if(v!=null&&meta.hot[i]==null)meta.hot[i]=v;});if(meta.mem==null&&r.mem!=null)meta.mem=r.mem;}}catch(e){}}}
-  decks[di].loadFile(f,meta);
+$('#libClose').addEventListener('click',()=>closeLib());
+function openLib(i){lib.target=i||0;$('#lTarget').textContent=`Ketuk lagu → Deck ${lib.target+1}`;$('#lTarget').style.color=COL[lib.target];$('#libOv').classList.add('open');renderSources();renderList();}
+function closeLib(){$('#libOv').classList.remove('open');$('#rMenu').classList.remove('open');}
+
+/* preview (dengar dulu sebelum dimuat) */
+const preview={a:new Audio(),t:null,url:null};
+function stopPreview(){try{preview.a.pause();}catch(e){}if(preview.url){URL.revokeObjectURL(preview.url);preview.url=null;}preview.t=null;renderListSoon();}
+function togglePreview(t){
+  if(!t)return;if(preview.t===t){stopPreview();return;}stopPreview();
+  const f=fileFor(t);if(!f){toast('File lagu tidak ditemukan.');return;}
+  preview.url=URL.createObjectURL(f);preview.t=t;preview.a.src=preview.url;preview.a.volume=0.8;
+  preview.a.onloadedmetadata=()=>{try{if(isFinite(preview.a.duration))preview.a.currentTime=preview.a.duration*0.3;}catch(e){}};
+  preview.a.onended=()=>stopPreview();
+  preview.a.play().catch(()=>{toast('Preview tidak bisa diputar untuk format ini (tetap bisa dimuat ke deck).');stopPreview();});
+  renderListSoon();
 }
-function browse(dl){if(!lib.view.length)return;lib.sel=clamp(lib.sel+dl,0,lib.view.length-1);$$('.item.sel').forEach(x=>x.classList.remove('sel'));const it=$(`.item[data-i="${lib.sel}"]`);if(it){it.classList.add('sel');it.scrollIntoView({block:'nearest'});}
-  const t=lib.view[lib.sel];if(t&&!$('#libSheet').classList.contains('open'))toast('▶ '+t.title,1200);}
+
+/* metadata ID3 (judul, artis, BPM, key, artwork) untuk file non-rekordbox */
+const metaQ=[];let metaBusy=false;
+function queueMeta(ts){ts.forEach(t=>{if(/\.mp3$/i.test(t.file.name))metaQ.push(t);});if(!metaBusy)runMeta();}
+async function runMeta(){metaBusy=true;while(metaQ.length){const t=metaQ.shift();try{const m=await readID3(t.file);if(m){
+  if(m.TIT2)t.title=m.TIT2;if(m.TPE1)t.artist=m.TPE1;if(m.TBPM&&parseFloat(m.TBPM)>0)t.bpm=parseFloat(m.TBPM);if(m.TKEY)t.key=toCamelot(m.TKEY);if(m.APIC){t.artBlob=m.APIC;t.artUrl=undefined;}
+  renderListSoon();}}catch(e){}}metaBusy=false;}
+function decText(u){const enc=u[0],d=u.subarray(1);let s;
+  if(enc===1){s=(d[0]===0xFE&&d[1]===0xFF)?new TextDecoder('utf-16be').decode(d.subarray(2)):new TextDecoder('utf-16le').decode(d[0]===0xFF?d.subarray(2):d);}
+  else if(enc===2)s=new TextDecoder('utf-16be').decode(d);else if(enc===3)s=new TextDecoder('utf-8').decode(d);else s=new TextDecoder('windows-1252').decode(d);
+  return s.split('\0').filter(Boolean)[0]?.trim()||'';}
+async function readID3(file){
+  const h=new Uint8Array(await file.slice(0,10).arrayBuffer());
+  if(h.length<10||h[0]!==0x49||h[1]!==0x44||h[2]!==0x33)return null;const ver=h[3];if(ver<3||ver>4)return null;
+  const ss=(a,b,c,d)=>((a&127)<<21)|((b&127)<<14)|((c&127)<<7)|(d&127);
+  const size=ss(h[6],h[7],h[8],h[9]);const buf=new Uint8Array(await file.slice(10,10+Math.min(size,6*1048576)).arrayBuffer());const dv=new DataView(buf.buffer);
+  let o=0;if(h[5]&0x40)o=ver===4?ss(buf[0],buf[1],buf[2],buf[3]):dv.getUint32(0)+4;
+  const out={};
+  while(o+10<=buf.length){
+    const id=String.fromCharCode(buf[o],buf[o+1],buf[o+2],buf[o+3]);if(!/^[A-Z0-9]{4}$/.test(id))break;
+    const sz=ver===4?ss(buf[o+4],buf[o+5],buf[o+6],buf[o+7]):dv.getUint32(o+4);const b=o+10;if(sz<=0||b+sz>buf.length)break;
+    if(id==='TIT2'||id==='TPE1'||id==='TBPM'||id==='TKEY')out[id]=decText(buf.subarray(b,b+sz));
+    else if(id==='APIC'&&!out.APIC){const enc=buf[b],end=b+sz;let p=b+1;while(p<end&&buf[p]!==0)p++;
+      const mime=new TextDecoder('latin1').decode(buf.subarray(b+1,p));p+=2;
+      if(enc===1||enc===2){while(p+1<end&&!(buf[p]===0&&buf[p+1]===0))p+=2;p+=2;}else{while(p<end&&buf[p]!==0)p++;p++;}
+      if(p<end)out.APIC=new Blob([buf.slice(p,end)],{type:mime.includes('/')?mime:('image/'+(mime||'jpeg').toLowerCase())});}
+    o=b+sz;
+  }
+  return out;
+}
+
+function fileFor(t){if(t.file)return t.file;const src=t.src;if(!src)return null;const k=normPath(t.path);
+  return src.files.get(k)||(t.filename&&src.byName.get(t.filename.toLowerCase()))||src.byName.get((t.path||'').split('/').pop().toLowerCase());}
+async function loadFromLib(t,di){
+  if(!t)return;
+  if(t.src&&!lib.sources.includes(t.src)){toast('Sumber lagu ini sudah dilepas.');return;}
+  const f=fileFor(t);if(!f){toast('File lagu tidak ditemukan. Pilih folder UTAMA flashdisk.');return;}
+  const meta={title:t.title,artist:t.artist,bpm:t.bpm,key:t.key,artUrl:artFor(t),ref:t};
+  if(t.anlz&&t.src){const k=normPath(t.anlz);
+    for(const kk of[k,k.replace(/\.dat$/,'.ext')]){const af=t.src.files.get(kk);if(!af)continue;
+      try{const r=parseANLZ(await af.arrayBuffer());if(r){if(meta.grid0==null&&r.grid0!=null)meta.grid0=r.grid0;if(!meta.hot)meta.hot=[];r.hot.forEach((v,i)=>{if(v!=null&&meta.hot[i]==null)meta.hot[i]=v;});if(meta.mem==null&&r.mem!=null)meta.mem=r.mem;}}catch(e){}}}
+  await decks[di].loadFile(f,meta);renderListSoon();
+}
+function browse(dl){if(!lib.view.length)return;lib.sel=clamp(lib.sel+dl,0,lib.view.length-1);$$('.lrow.sel').forEach(x=>x.classList.remove('sel'));const it=$(`.lrow[data-i="${lib.sel}"]`);if(it){it.classList.add('sel');it.scrollIntoView({block:'nearest'});}
+  const t=lib.view[lib.sel];if(t&&!$('#libOv').classList.contains('open'))toast('▶ '+t.title,1200);}
+renderSources();renderList();
 
 /* ---------- MIDI: Pioneer DDJ-FLX4 ---------- */
 async function initMIDI(){
