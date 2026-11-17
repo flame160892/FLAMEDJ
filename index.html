@@ -395,9 +395,15 @@ class Deck{
   async loadFile(file,meta={}){
     resumeCtx();
     const prevT=this.title;this.ui.ttl.textContent='Memuat… '+(meta.title||file.name);
-    let buf;
-    try{const ab=await file.arrayBuffer();buf=await new Promise((res,rej)=>{const p=ctx.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej);});}
-    catch(e){this.title=prevT;this.render();toast('Gagal membuka file ini (format tidak didukung browser).');return;}
+    let buf=null,ab=null;
+    if(!file.size){this.title=prevT;this.render();toast('File kosong (0 byte). Kalau dari Google Drive/cloud, unduh dulu ke HP lalu coba lagi.',5000);return;}
+    try{ab=await file.arrayBuffer();}catch(e){ab=null;}
+    if(!ab){try{ab=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsArrayBuffer(file);});}catch(e){ab=null;}}
+    if(!ab){this.title=prevT;this.render();toast('File tidak bisa dibaca dari penyimpanan: '+file.name+'. Salin dulu ke memori HP lalu coba lagi.',6000);return;}
+    try{buf=decodeAIFF(ab)||decodeWAV(ab);}catch(e){console.warn(e);buf=null;}
+    if(!buf){try{buf=await new Promise((res,rej)=>{const p=ctx.decodeAudioData(ab.slice(0),res,rej);if(p&&p.then)p.then(res,rej);});}catch(e){buf=null;}}
+    if(!buf){this.title=prevT;this.render();const ext=(file.name.split('.').pop()||'?').toUpperCase();
+      toast(`Gagal membuka ${file.name} (${ext}, ${(file.size/1048576).toFixed(1)} MB). File mungkin rusak, formatnya tidak didukung, atau HP kehabisan memori. Format yang didukung: MP3, WAV, AIFF, FLAC, M4A/AAC, OGG.`+(ext==='M4A'?' M4A lossless (ALAC) tidak didukung.':''),7000);return;}
     this.stopSrc();this.playing=false;this.previewing=false;
     Object.assign(this,{buffer:buf,offset:0,loop:null,lastLoop:null,loopInPt:null,hot:new Array(8).fill(null),synced:false});
     this.title=meta.title||file.name.replace(/\.[^.]+$/,'');this.artist=meta.artist||'';this.keyName=meta.key||'';
@@ -515,6 +521,76 @@ class Deck{
   render(){renderDeck(this);}
 }
 const decks=[new Deck(0),new Deck(1)];
+
+
+/* ---------- AIFF / AIFF-C decoder (Chrome tidak mendukung AIFF) ---------- */
+function decodeAIFF(ab){
+  const dv=new DataView(ab);
+  if(ab.byteLength<12||dv.getUint32(0)!==0x464f524d)return null;
+  const form=dv.getUint32(8),isC=form===0x41494643;
+  if(form!==0x41494646&&!isC)return null;
+  let o=12,ch=0,frames=0,bits=0,sr=0,comp='NONE',data=-1,dataEnd=ab.byteLength;
+  while(o+8<=ab.byteLength){
+    const id=dv.getUint32(o),sz=dv.getUint32(o+4),b=o+8;
+    if(id===0x434f4d4d){
+      ch=dv.getInt16(b);frames=dv.getUint32(b+2);bits=dv.getInt16(b+6);
+      const e=dv.getUint16(b+8),hi=dv.getUint32(b+10),lo=dv.getUint32(b+14);
+      sr=(hi*4294967296+lo)*Math.pow(2,(e&0x7fff)-16383-63);
+      if(isC)comp=String.fromCharCode(dv.getUint8(b+18),dv.getUint8(b+19),dv.getUint8(b+20),dv.getUint8(b+21));
+    }else if(id===0x53534e44){data=b+8+dv.getUint32(b);dataEnd=Math.min(ab.byteLength,b+sz);}
+    o=b+sz+(sz&1);
+  }
+  if(!ch||!frames||!sr||data<0)throw new Error('AIFF tidak lengkap');
+  const c=comp.toLowerCase(),le=c==='sowt',flt=c==='fl32'||c==='fl64';
+  if(!['none','twos','sowt','fl32','fl64'].includes(c))throw new Error('Kompresi AIFF-C tidak didukung: '+comp);
+  const bps=flt?(c==='fl64'?8:4):Math.ceil(bits/8),stride=bps*ch;
+  frames=Math.min(frames,Math.floor((dataEnd-data)/stride));
+  const out=ctx.createBuffer(ch,frames,Math.round(sr)),chs=[];for(let k=0;k<ch;k++)chs.push(out.getChannelData(k));
+  const u8=new Uint8Array(ab),scale=1/Math.pow(2,bps*8-1);
+  for(let i=0;i<frames;i++){
+    let p=data+i*stride;
+    for(let k=0;k<ch;k++,p+=bps){
+      let v;
+      if(flt)v=bps===4?dv.getFloat32(p,le):dv.getFloat64(p,le);
+      else if(bps===2)v=dv.getInt16(p,le)*scale;
+      else if(bps===3){v=le?(u8[p]|u8[p+1]<<8|u8[p+2]<<16):(u8[p]<<16|u8[p+1]<<8|u8[p+2]);if(v&0x800000)v-=0x1000000;v*=scale;}
+      else if(bps===4)v=dv.getInt32(p,le)*scale;
+      else v=(dv.getInt8(p))*scale;
+      chs[k][i]=v;
+    }
+  }
+  return out;
+}
+
+
+/* ---------- WAV decoder (PCM 8/16/24/32-bit & float) ---------- */
+function decodeWAV(ab){
+  const dv=new DataView(ab);
+  if(ab.byteLength<12)return null;
+  const riff=dv.getUint32(0);if((riff!==0x52494646&&riff!==0x52463634)||dv.getUint32(8)!==0x57415645)return null;
+  let o=12,fmt=0,ch=0,sr=0,bits=0,data=-1,dlen=0;
+  while(o+8<=ab.byteLength){
+    const id=dv.getUint32(o);let sz=dv.getUint32(o+4,true);const b=o+8;
+    if(id===0x666d7420){fmt=dv.getUint16(b,true);ch=dv.getUint16(b+2,true);sr=dv.getUint32(b+4,true);bits=dv.getUint16(b+14,true);
+      if(fmt===0xFFFE&&sz>=40)fmt=dv.getUint16(b+24,true);}
+    else if(id===0x64617461){data=b;dlen=(sz===0xFFFFFFFF||b+sz>ab.byteLength)?ab.byteLength-b:sz;break;}
+    o=b+sz+(sz&1);
+  }
+  if(data<0||!ch||!sr||(fmt!==1&&fmt!==3))return null;
+  const bps=bits/8;if(![1,2,3,4,8].includes(bps))return null;
+  const stride=bps*ch,frames=Math.floor(dlen/stride);if(!frames)return null;
+  const out=ctx.createBuffer(ch,frames,sr),chs=[];for(let k=0;k<ch;k++)chs.push(out.getChannelData(k));
+  const u8=new Uint8Array(ab);
+  for(let i=0;i<frames;i++){let p=data+i*stride;
+    for(let k=0;k<ch;k++,p+=bps){let v;
+      if(fmt===3)v=bps===4?dv.getFloat32(p,true):dv.getFloat64(p,true);
+      else if(bps===2)v=dv.getInt16(p,true)/32768;
+      else if(bps===3){v=u8[p]|u8[p+1]<<8|u8[p+2]<<16;if(v&0x800000)v-=0x1000000;v/=8388608;}
+      else if(bps===4)v=dv.getInt32(p,true)/2147483648;
+      else v=(u8[p]-128)/128;
+      chs[k][i]=v;}}
+  return out;
+}
 
 /* ---------- BPM + phase detection ---------- */
 function detectBeat(buf,known){
